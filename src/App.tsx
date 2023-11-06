@@ -1,6 +1,31 @@
+import { useEffect, useState } from "react";
 import { AmountInput } from "./AmountInput";
 import { SwapDetails } from "./SwapDetails";
 import { TokenSelect } from "./TokenSelect";
+
+const QUERY =
+  "https://lcd-kujira.mintthemoon.xyz/cosmwasm/wasm/v1/contract/kujira1n3fr5f56r2ce0s37wdvwrk98yhhq3unnxgcqus8nzsfxvllk0yxquurqty/smart/eyJzdGF0ZSI6e319";
+
+type State = {
+  data: {
+    total_ustake: string;
+    total_utoken: string;
+    exchange_rate: string;
+    unlocked_coins: [
+      {
+        denom: string;
+        amount: string;
+      },
+      {
+        denom: string;
+        amount: string;
+      }
+    ];
+    unbonding: string;
+    available: string;
+    tvl_utoken: string;
+  };
+};
 
 export default function App() {
   return (
@@ -20,6 +45,13 @@ export default function App() {
 }
 
 const Content = () => {
+  const [state, setState] = useState<State>();
+  useEffect(() => {
+    fetch(QUERY)
+      .then((res) => res.json())
+      .then(setState);
+  }, []);
+  const [amount, setAmount] = useState("");
   return (
     <div className="">
       <h1 className="text-slate-100 mt-8 mb-2 text-center text-4xl font-light">
@@ -27,8 +59,11 @@ const Content = () => {
       </h1>
 
       <TokenSelect />
-      <AmountInput />
-      <SwapDetails />
+      <AmountInput amount={amount} setAmount={setAmount} />
+      <SwapDetails
+        protocolRate={parseFloat(state?.data.exchange_rate || "0")}
+        amount={amount}
+      />
 
       <div className="text-center mt-4">
         <button
