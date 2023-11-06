@@ -8,8 +8,8 @@ export const SwapDetails: FC<{ protocolRate: number; amount: string }> = ({
   const returnAmount = parseFloat(amount) * protocolRate * premiumRate;
 
   return (
-    <div className="grid grid-cols-1 gap-px md:grid-cols-3">
-      <div className="px-4 py-6 sm:px-6 lg:px-8">
+    <div className="flex flex-wrap max-w-2xl mt-3">
+      <div className="px-4 py-3 sm:px-6 lg:px-8">
         <p className="text-sm font-medium leading-6 text-slate-400">
           Protocol Rate
         </p>
@@ -21,7 +21,7 @@ export const SwapDetails: FC<{ protocolRate: number; amount: string }> = ({
         </p>
       </div>
 
-      <div className="px-4 py-6 sm:px-6 lg:px-8">
+      <div className="px-4 py-3 sm:px-6 lg:px-8">
         <p className="text-sm font-medium leading-6 text-slate-400">
           Offer Rate
         </p>
@@ -33,7 +33,7 @@ export const SwapDetails: FC<{ protocolRate: number; amount: string }> = ({
         </p>
       </div>
 
-      <div className="px-4 py-6 sm:px-6 lg:px-8">
+      <div className="px-4 py-3 sm:px-6 lg:px-8">
         <p className="text-sm font-medium leading-6 text-slate-400">
           Return Amount
         </p>
