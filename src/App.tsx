@@ -4,9 +4,15 @@ import { TokenSelect } from "./TokenSelect";
 
 export default function App() {
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      {/* We've used 3xl here, but feel free to try other max-widths based on your needs */}
-      <div className="mx-auto max-w-3xl">
+    <div className="min-h-screen bg-slate-900 flex items-center p-4 sm:p-6 lg:p-8">
+      <div className="mx-auto max-w-7xl">
+        <div className="flex">
+          <img
+            src="/unstake.png"
+            alt="UNSTAKE.fi Logo"
+            className="block h-20"
+          />
+        </div>
         <Content />
       </div>
     </div>
@@ -15,17 +21,20 @@ export default function App() {
 
 const Content = () => {
   return (
-    <div className="divide-y divide-gray-200 overflow-hidden rounded-lg bg-white shadow">
-      <div className="px-4 py-5 sm:px-6">Don't Wait. Unstake.</div>
-      <div className="px-4 py-5 sm:p-6 bg-gray-900">
-        <TokenSelect />
-        <AmountInput />
-        <SwapDetails />
-      </div>
-      <div className="px-4 py-4 sm:px-6">
+    <div className="">
+      <h1 className="text-slate-100 mt-8 mb-2 text-center text-4xl font-light">
+        Don't Wait. <span className="text-red-600 font-bold">Unstake.</span>
+      </h1>
+
+      <TokenSelect />
+      <AmountInput />
+      <SwapDetails />
+
+      <div className="text-center mt-4">
         <button
+          disabled
           type="button"
-          className="rounded-md bg-indigo-600 px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+          className="py-2.5 px-5 mr-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-slate-200 hover:bg-slate-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-slate-200 dark:focus:ring-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-600 dark:hover:text-white dark:hover:bg-slate-700"
         >
           Unstake
         </button>
