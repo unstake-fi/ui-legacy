@@ -10,6 +10,29 @@ const tokens = [
     avatar:
       "https://raw.githubusercontent.com/cosmos/chain-registry/master/kujira/images/ampkuji.png",
   },
+  {
+    symbol: "ampMNTA",
+    denom:
+      "factory/kujira1n3fr5f56r2ce0s37wdvwrk98yhhq3unnxgcqus8nzsfxvllk0yxquurqty/ampMNTA",
+    avatar:
+      "https://raw.githubusercontent.com/cosmos/chain-registry/master/kujira/images/ampmnta.png",
+  },
+
+  {
+    symbol: "qcKUJI",
+    denom:
+      "factory/kujira1n3fr5f56r2ce0s37wdvwrk98yhhq3unnxgcqus8nzsfxvllk0yxquurqty/qcKUJI",
+    avatar:
+      "https://raw.githubusercontent.com/cosmos/chain-registry/master/kujira/images/qckuji.svg",
+  },
+
+  {
+    symbol: "qcMNTA",
+    denom:
+      "factory/kujira1n3fr5f56r2ce0s37wdvwrk98yhhq3unnxgcqus8nzsfxvllk0yxquurqty/qcMNTA",
+    avatar:
+      "https://raw.githubusercontent.com/cosmos/chain-registry/master/kujira/images/qcmnta.svg",
+  },
 ];
 
 function classNames(...classes: string[]) {
