@@ -21,7 +21,22 @@ const toClient = async (endpoint: string): Promise<Tendermint37Client> => {
 const QUERY =
   "https://lcd-kujira.mintthemoon.xyz/cosmwasm/wasm/v1/contract/kujira1n3fr5f56r2ce0s37wdvwrk98yhhq3unnxgcqus8nzsfxvllk0yxquurqty/smart/eyJzdGF0ZSI6e319";
 
-type ControllerConfig = any;
+export type ControllerConfig = {
+  owner: string;
+  protocol_fee: string;
+  delegate_code_id: number;
+  vault_address: string;
+  offer_denom: string;
+  ask_denom: string;
+  adapter: {
+    contract: {
+      address: string;
+      redemption_rate_query: string;
+      unbond_start_msg: string;
+      unbond_end_msg: string;
+    };
+  };
+};
 
 type State = {
   data: {
@@ -65,6 +80,7 @@ const Content = () => {
   const [state, setState] = useState<State>();
   const [controllers, setControllers] =
     useState<Record<string, ControllerConfig>>();
+  const [selected, setSelected] = useState<string>();
   const [queryClient, setQueryClient] = useState<KujiraQueryClient>();
   useEffect(() => {
     Promise.any(RPCS[TESTNET].map(toClient))
@@ -74,16 +90,15 @@ const Content = () => {
   }, []);
 
   useEffect(() => {
-    queryClient?.wasm
-      .listContractsByCodeId(2685)
-      .then((x) =>
-        x.contracts.map((y) =>
-          queryClient.wasm.queryContractSmart(y, { config: {} })
-        )
+    queryClient?.wasm.listContractsByCodeId(2686).then((x) => {
+      !selected && setSelected(x.contracts[0]);
+      x.contracts.map((y) =>
+        queryClient.wasm
+          .queryContractSmart(y, { config: {} })
+          .then((res) => setControllers((prev) => ({ ...prev, [y]: res })))
       );
+    });
   }, [queryClient]);
-
-  console.log(controllers);
 
   useEffect(() => {
     fetch(QUERY)
@@ -98,7 +113,11 @@ const Content = () => {
         Don't Wait. <span className="text-red-600 font-bold">Unstake.</span>
       </h1>
 
-      <TokenSelect />
+      <TokenSelect
+        controllers={controllers}
+        selected={selected}
+        setSelected={setSelected}
+      />
       <AmountInput amount={amount} setAmount={setAmount} />
       <SwapDetails
         protocolRate={parseFloat(state?.data.exchange_rate || "0")}
