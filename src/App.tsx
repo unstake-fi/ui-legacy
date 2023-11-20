@@ -1,10 +1,27 @@
+import { HttpBatchClient, Tendermint37Client } from "@cosmjs/tendermint-rpc";
+import { KujiraQueryClient, RPCS, TESTNET, kujiraQueryClient } from "kujira.js";
 import { useEffect, useState } from "react";
 import { AmountInput } from "./AmountInput";
 import { SwapDetails } from "./SwapDetails";
 import { TokenSelect } from "./TokenSelect";
 
+const toClient = async (endpoint: string): Promise<Tendermint37Client> => {
+  const start = new Date().getTime();
+
+  const c = await Tendermint37Client.create(
+    new HttpBatchClient(endpoint, {
+      dispatchInterval: 100,
+      batchSizeLimit: 200,
+    })
+  );
+  await c.status();
+  return c;
+};
+
 const QUERY =
   "https://lcd-kujira.mintthemoon.xyz/cosmwasm/wasm/v1/contract/kujira1n3fr5f56r2ce0s37wdvwrk98yhhq3unnxgcqus8nzsfxvllk0yxquurqty/smart/eyJzdGF0ZSI6e319";
+
+type ControllerConfig = any;
 
 type State = {
   data: {
@@ -46,11 +63,34 @@ export default function App() {
 
 const Content = () => {
   const [state, setState] = useState<State>();
+  const [controllers, setControllers] =
+    useState<Record<string, ControllerConfig>>();
+  const [queryClient, setQueryClient] = useState<KujiraQueryClient>();
+  useEffect(() => {
+    Promise.any(RPCS[TESTNET].map(toClient))
+      .then((client) => kujiraQueryClient({ client }))
+      .then(setQueryClient)
+      .catch((err) => {});
+  }, []);
+
+  useEffect(() => {
+    queryClient?.wasm
+      .listContractsByCodeId(2685)
+      .then((x) =>
+        x.contracts.map((y) =>
+          queryClient.wasm.queryContractSmart(y, { config: {} })
+        )
+      );
+  }, [queryClient]);
+
+  console.log(controllers);
+
   useEffect(() => {
     fetch(QUERY)
       .then((res) => res.json())
       .then(setState);
   }, []);
+
   const [amount, setAmount] = useState("");
   return (
     <div className="">
