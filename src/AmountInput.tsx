@@ -1,10 +1,14 @@
 import { ArrowUpTrayIcon } from "@heroicons/react/20/solid";
 import { FC } from "react";
 
+import { BigNumber } from "@ethersproject/bignumber";
+
 export const AmountInput: FC<{
   amount: string;
+  max?: string;
   setAmount: (v: string) => void;
-}> = ({ amount, setAmount }) => {
+  setAmountInt: (v: BigNumber) => void;
+}> = ({ amount, max, setAmount, setAmountInt }) => {
   return (
     <div>
       <div className="mt-2 flex rounded-md shadow-sm">
@@ -26,11 +30,11 @@ export const AmountInput: FC<{
           />
         </div>
         <button
-          onClick={() => setAmount("0")}
+          onClick={() => max && setAmountInt(BigNumber.from(max))}
           type="button"
           className="relative -ml-px inline-flex items-center gap-x-1.5 rounded-r-md px-3 py-2 text-sm text-slate-400 ring-1 ring-inset ring-slate-700 hover:bg-slate-700 hover:text-slate-300"
         >
-          0.000 Max
+          {max ? (parseInt(max) / 1e6).toFixed(3) : "0.000"} Max
         </button>
       </div>
     </div>

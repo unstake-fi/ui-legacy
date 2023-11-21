@@ -1,5 +1,7 @@
+import { SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 import { HttpBatchClient, Tendermint37Client } from "@cosmjs/tendermint-rpc";
 import {
+  CHAIN_INFO,
   Denom,
   KUJI,
   KujiraQueryClient,
@@ -13,6 +15,8 @@ import { SwapDetails } from "./SwapDetails";
 import { TokenSelect } from "./TokenSelect";
 import { useDebouncedEffect } from "./useDebouncedEffect";
 import { useTokenAmount } from "./useTokenAmount";
+
+const CHAIN_ID = TESTNET;
 
 const toClient = async (endpoint: string): Promise<Tendermint37Client> => {
   const c = await Tendermint37Client.create(
@@ -97,8 +101,41 @@ const Content = () => {
     controller ? Denom.from(controller?.config.ask_denom) : KUJI
   );
 
+  const [wallet, setWallet] = useState<{
+    client: SigningCosmWasmClient;
+    account: string;
+  }>();
+
+  const [balance, setBalance] = useState<string>();
   useEffect(() => {
-    Promise.any(RPCS[TESTNET].map(toClient))
+    wallet &&
+      controller &&
+      queryClient?.bank
+        .balance(wallet.account, controller.config.ask_denom)
+        .then((res) => setBalance(res.amount));
+  }, [queryClient, wallet, controller]);
+
+  const connect = async () => {
+    if (!queryClient) return;
+    const rpcUrl = queryClient["tmClient"].client.url;
+    await window.leap.experimentalSuggestChain({
+      ...CHAIN_INFO[CHAIN_ID],
+      rpc: rpcUrl,
+      rest: "https://kujira-testnet-api.polkachu.com",
+    });
+    // await window.leap.enable(CHAIN_ID);
+    const offlineSigner = await window.leap.getOfflineSignerAuto(CHAIN_ID);
+    const accounts = await offlineSigner.getAccounts();
+
+    const client = await SigningCosmWasmClient.connectWithSigner(
+      rpcUrl,
+      offlineSigner
+    );
+    setWallet({ client, account: accounts[0].address });
+  };
+
+  useEffect(() => {
+    Promise.any(RPCS[CHAIN_ID].map(toClient))
       .then((client) => kujiraQueryClient({ client }))
       .then(setQueryClient)
       .catch((err) => {});
@@ -148,22 +185,37 @@ const Content = () => {
         setSelected={setSelected}
       />
       <AmountInput
+        max={balance}
         amount={amount}
         setAmount={(amount) => {
           setAmount(amount);
+          setOffer(undefined);
+        }}
+        setAmountInt={(int) => {
+          setAmountInt(int);
           setOffer(undefined);
         }}
       />
       <SwapDetails amount={amount} rates={controller?.rates} offer={offer} />
 
       <div className="text-center mt-4">
-        <button
-          disabled
-          type="button"
-          className="py-2.5 px-5 mr-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-slate-200 hover:bg-slate-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-slate-200 dark:focus:ring-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-600 dark:hover:text-white dark:hover:bg-slate-700"
-        >
-          Unstake
-        </button>
+        {wallet ? (
+          <button
+            disabled
+            type="button"
+            className="py-2.5 px-5 mr-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-slate-200 hover:bg-slate-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-slate-200 dark:focus:ring-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-600 dark:hover:text-white dark:hover:bg-slate-700"
+          >
+            Unstake
+          </button>
+        ) : (
+          <button
+            onClick={connect}
+            type="button"
+            className="py-2.5 px-5 mr-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-slate-200 hover:bg-slate-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-slate-200 dark:focus:ring-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-600 dark:hover:text-white dark:hover:bg-slate-700"
+          >
+            Connect LEAP Wallet
+          </button>
+        )}
       </div>
     </div>
   );
