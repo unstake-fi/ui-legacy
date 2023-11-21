@@ -6,14 +6,12 @@ import { GasPrice } from "@cosmjs/stargate";
 import { HttpBatchClient, Tendermint37Client } from "@cosmjs/tendermint-rpc";
 import {
   CHAIN_INFO,
-  Denom,
-  KUJI,
   KujiraQueryClient,
   RPCS,
   TESTNET,
   kujiraQueryClient,
 } from "kujira.js";
-import { FC, useEffect, useState } from "react";
+import { FC, useEffect, useMemo, useState } from "react";
 import { AmountInput } from "./AmountInput";
 import { SwapDetails } from "./SwapDetails";
 import { TokenSelect } from "./TokenSelect";
@@ -21,7 +19,7 @@ import { useDebouncedEffect } from "./useDebouncedEffect";
 import { useTokenAmount } from "./useTokenAmount";
 
 const CHAIN_ID = TESTNET;
-const CODE_ID = 2689;
+const CODE_ID = 2691;
 
 const toClient = async (endpoint: string): Promise<Tendermint37Client> => {
   const c = await Tendermint37Client.create(
@@ -99,12 +97,12 @@ const Content = () => {
   const [selected, setSelected] = useState<string>();
   const [queryClient, setQueryClient] = useState<KujiraQueryClient>();
   const [offer, setOffer] = useState<Offer>();
-  const controller =
-    selected && controllers ? controllers[selected] : undefined;
-
-  const [[amount, setAmount], [amountInt, setAmountInt]] = useTokenAmount(
-    controller ? Denom.from(controller?.config.ask_denom) : KUJI
+  const controller = useMemo(
+    () => (selected && controllers ? controllers[selected] : undefined),
+    [selected, controllers]
   );
+
+  const [[amount, setAmount], [amountInt, setAmountInt]] = useTokenAmount(6);
 
   const [result, setResult] = useState<"working" | ExecuteResult | Error>();
 
@@ -201,7 +199,7 @@ const Content = () => {
             console.error(err);
           });
     },
-    [queryClient, amountInt, selected],
+    [queryClient, amount, selected],
     500
   );
 

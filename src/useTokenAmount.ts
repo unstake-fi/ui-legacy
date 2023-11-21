@@ -21,7 +21,7 @@ export type UseTokenAmount = [
 ];
 
 export const useTokenAmount = (denom: Denom | number): UseTokenAmount => {
-  const decimals = typeof denom === "number" ? denom : denom.decimals;
+  const decimals = typeof denom == "number" ? denom : denom.decimals;
   const [value, setValue_] = useState("");
   const setValue = (v: string) => {
     const x = toPrecision(validInput(v), decimals);
