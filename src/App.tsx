@@ -21,6 +21,7 @@ import { useDebouncedEffect } from "./useDebouncedEffect";
 import { useTokenAmount } from "./useTokenAmount";
 
 const CHAIN_ID = TESTNET;
+const CODE_ID = 2689;
 
 const toClient = async (endpoint: string): Promise<Tendermint37Client> => {
   const c = await Tendermint37Client.create(
@@ -170,7 +171,7 @@ const Content = () => {
   }, []);
 
   useEffect(() => {
-    queryClient?.wasm.listContractsByCodeId(2688).then((x) => {
+    queryClient?.wasm.listContractsByCodeId(CODE_ID).then((x) => {
       !selected && setSelected(x.contracts[0]);
       x.contracts.map((y) =>
         Promise.all([
@@ -185,7 +186,7 @@ const Content = () => {
         )
       );
     });
-  }, [queryClient]);
+  }, [queryClient, selected]);
 
   useDebouncedEffect(
     () => {

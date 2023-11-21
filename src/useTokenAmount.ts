@@ -3,7 +3,7 @@ import { Denom, fromHumanString } from "kujira.js";
 import { useState } from "react";
 
 export const toPrecision = (num: string, precision: number): string => {
-  if (Number(Number(num).toFixed(precision)) == Number(num)) {
+  if (Number(Number(num).toFixed(precision)) === Number(num)) {
     return num;
   } else {
     return Number(num).toFixed(precision);
