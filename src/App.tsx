@@ -1,4 +1,8 @@
-import { SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
+import {
+  ExecuteResult,
+  SigningCosmWasmClient,
+} from "@cosmjs/cosmwasm-stargate";
+import { GasPrice } from "@cosmjs/stargate";
 import { HttpBatchClient, Tendermint37Client } from "@cosmjs/tendermint-rpc";
 import {
   CHAIN_INFO,
@@ -9,7 +13,7 @@ import {
   TESTNET,
   kujiraQueryClient,
 } from "kujira.js";
-import { useEffect, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { AmountInput } from "./AmountInput";
 import { SwapDetails } from "./SwapDetails";
 import { TokenSelect } from "./TokenSelect";
@@ -101,6 +105,8 @@ const Content = () => {
     controller ? Denom.from(controller?.config.ask_denom) : KUJI
   );
 
+  const [result, setResult] = useState<"working" | ExecuteResult | Error>();
+
   const [wallet, setWallet] = useState<{
     client: SigningCosmWasmClient;
     account: string;
@@ -129,16 +135,38 @@ const Content = () => {
 
     const client = await SigningCosmWasmClient.connectWithSigner(
       rpcUrl,
-      offlineSigner
+      offlineSigner,
+      { gasPrice: GasPrice.fromString("0.00125ukuji") }
     );
     setWallet({ client, account: accounts[0].address });
+  };
+
+  const submit = () => {
+    if (!wallet) return;
+    if (!amount) return;
+    if (!offer) return;
+    if (!controller) return;
+    setResult("working");
+    wallet.client
+      .execute(
+        wallet.account,
+        controller.address,
+        { unstake: { max_fee: offer.fee } },
+        "auto",
+        "",
+        [{ amount: amountInt.toString(), denom: controller.config.ask_denom }]
+      )
+      .then(setResult)
+      .catch(setResult);
   };
 
   useEffect(() => {
     Promise.any(RPCS[CHAIN_ID].map(toClient))
       .then((client) => kujiraQueryClient({ client }))
       .then(setQueryClient)
-      .catch((err) => {});
+      .catch((err) => {
+        console.error(err);
+      });
   }, []);
 
   useEffect(() => {
@@ -167,7 +195,10 @@ const Content = () => {
           .queryContractSmart(selected, {
             offer: { amount: amountInt.toString() },
           })
-          .then(setOffer);
+          .then(setOffer)
+          .catch((err) => {
+            console.error(err);
+          });
     },
     [queryClient, amountInt, selected],
     500
@@ -200,13 +231,17 @@ const Content = () => {
 
       <div className="text-center mt-4">
         {wallet ? (
-          <button
-            disabled
-            type="button"
-            className="py-2.5 px-5 mr-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-slate-200 hover:bg-slate-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-slate-200 dark:focus:ring-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-600 dark:hover:text-white dark:hover:bg-slate-700"
-          >
-            Unstake
-          </button>
+          result ? (
+            <Result result={result} />
+          ) : (
+            <button
+              onClick={submit}
+              type="button"
+              className="py-2.5 px-5 mr-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-slate-200 hover:bg-slate-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-slate-200 dark:focus:ring-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-600 dark:hover:text-white dark:hover:bg-slate-700"
+            >
+              Unstake
+            </button>
+          )
         ) : (
           <button
             onClick={connect}
@@ -218,5 +253,51 @@ const Content = () => {
         )}
       </div>
     </div>
+  );
+};
+
+const Result: FC<{ result: "working" | Error | ExecuteResult }> = ({
+  result,
+}) => {
+  if (result === "working")
+    return (
+      <button
+        disabled
+        type="button"
+        className="py-2.5 px-5 mr-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-slate-200 hover:bg-slate-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-slate-200 dark:focus:ring-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-600 dark:hover:text-white dark:hover:bg-slate-700"
+      >
+        Unstaking...
+      </button>
+    );
+
+  if ("transactionHash" in result)
+    return (
+      <>
+        <button
+          disabled
+          type="button"
+          className="py-2.5 px-5 mr-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-slate-200 hover:bg-slate-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-slate-200 dark:focus:ring-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-600 dark:hover:text-white dark:hover:bg-slate-700"
+        >
+          Success
+        </button>
+        <a
+          href={`https://finder.kujira.network/harpoon-4/tx/${result.transactionHash}`}
+        >
+          {result.transactionHash}
+        </a>
+      </>
+    );
+
+  return (
+    <>
+      <button
+        disabled
+        type="button"
+        className="py-2.5 px-5 mr-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-slate-200 hover:bg-slate-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-slate-200 dark:focus:ring-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-600 dark:hover:text-white dark:hover:bg-slate-700"
+      >
+        Error
+      </button>
+      <span>{result.message}</span>
+    </>
   );
 };
