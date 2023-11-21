@@ -104,7 +104,9 @@ const Content = () => {
 
   const [[amount, setAmount], [amountInt, setAmountInt]] = useTokenAmount(6);
 
-  const [result, setResult] = useState<"working" | ExecuteResult | Error>();
+  const [result, setResult] = useState<
+    "working" | ExecuteResult | Error | null
+  >();
 
   const [wallet, setWallet] = useState<{
     client: SigningCosmWasmClient;
@@ -209,6 +211,20 @@ const Content = () => {
         Don't Wait. <span className="text-red-600 font-bold">Unstake.</span>
       </h1>
 
+      {wallet && wallet.account && (
+        <div
+          className="items-center justify-center leading-none flex flex-wrap w-full my-1"
+          role="alert"
+        >
+          <span className="border border-teal-500 flex rounded-full bg-teal-800 px-2 py-1 text-xs font-bold mr-3 text-teal-300">
+            Connected
+          </span>
+          <span className="text-xs text-left text-slate-200">
+            {wallet.account}
+          </span>
+        </div>
+      )}
+
       <TokenSelect
         controllers={controllers}
         controller={controller}
@@ -231,7 +247,7 @@ const Content = () => {
       <div className="text-center mt-4">
         {wallet ? (
           result ? (
-            <Result result={result} />
+            <Result result={result} onClick={() => setResult(null)} />
           ) : (
             <button
               onClick={submit}
@@ -255,48 +271,48 @@ const Content = () => {
   );
 };
 
-const Result: FC<{ result: "working" | Error | ExecuteResult }> = ({
-  result,
-}) => {
+const Result: FC<{
+  result: "working" | Error | ExecuteResult;
+  onClick: () => void;
+}> = ({ result, onClick }) => {
   if (result === "working")
     return (
-      <button
-        disabled
-        type="button"
-        className="py-2.5 px-5 mr-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-slate-200 hover:bg-slate-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-slate-200 dark:focus:ring-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-600 dark:hover:text-white dark:hover:bg-slate-700"
+      <div
+        className="bg-indigo-900 border border-indigo-500  text-sm px-2 py-1 rounded relative flex justify-center cursor-wait"
+        role="alert"
       >
-        Unstaking...
-      </button>
+        <strong className="font-bold mr-1 text-indigo-500">Unstaking...</strong>
+      </div>
     );
 
   if ("transactionHash" in result)
     return (
-      <>
-        <button
-          disabled
-          type="button"
-          className="py-2.5 px-5 mr-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-slate-200 hover:bg-slate-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-slate-200 dark:focus:ring-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-600 dark:hover:text-white dark:hover:bg-slate-700"
+      <a
+        href={`https://finder.kujira.network/harpoon-4/tx/${result.transactionHash}`}
+        target="_blank"
+        className="bg-teal-900 border border-teal-500 text-sm px-4 py-3 rounded relative flex items-center text-teal-300 hover:text-white"
+        role="alert"
+      >
+        <strong className="font-bold mr-1 text-teal-500">Success:</strong>
+        <span className="block sm:inline mr-1"> {result.transactionHash}</span>
+        <svg
+          className="fill-current opacity-75 h-4 w-4 ml-auto"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 20 20"
         >
-          Success
-        </button>
-        <a
-          href={`https://finder.kujira.network/harpoon-4/tx/${result.transactionHash}`}
-        >
-          {result.transactionHash}
-        </a>
-      </>
+          <path d="M12.95 10.707l.707-.707L8 4.343 6.586 5.757 10.828 10l-4.242 4.243L8 15.657l4.95-4.95z" />
+        </svg>
+      </a>
     );
 
   return (
-    <>
-      <button
-        disabled
-        type="button"
-        className="py-2.5 px-5 mr-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-slate-200 hover:bg-slate-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-slate-200 dark:focus:ring-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-600 dark:hover:text-white dark:hover:bg-slate-700"
-      >
-        Error
-      </button>
-      <span>{result.message}</span>
-    </>
+    <div
+      className="bg-red-900 border border-red-500  text-sm px-4 py-3 rounded relative cursor-pointer"
+      role="alert"
+      onClick={onClick}
+    >
+      <strong className="font-bold mr-1 text-red-500">Error:</strong>
+      <span className="block sm:inline text-red-300">{result.message}</span>
+    </div>
   );
 };
