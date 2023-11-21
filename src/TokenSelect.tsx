@@ -2,7 +2,7 @@ import { Listbox, Transition } from "@headlessui/react";
 import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import { Denom } from "kujira.js";
 import { FC, Fragment } from "react";
-import { ControllerConfig } from "./App";
+import { Controller } from "./App";
 
 const icons: Record<string, string> = {
   "factory/kujira1hf3898lecj8lawxq8nwqczegrla9denzfkx4asjg0q27cyes44sq68gvc9/ampKUJI":
@@ -25,13 +25,12 @@ function classNames(...classes: string[]) {
 }
 
 export const TokenSelect: FC<{
-  controllers?: Record<string, ControllerConfig>;
-  selected?: string;
+  controllers?: Record<string, Controller>;
+  controller?: Controller;
   setSelected: (v: string) => void;
-}> = ({ controllers, selected, setSelected }) => {
-  const controller = selected && controllers && controllers[selected];
+}> = ({ controllers, controller, setSelected }) => {
   return (
-    <Listbox value={selected} onChange={setSelected}>
+    <Listbox value={controller?.address} onChange={setSelected}>
       {({ open }) => (
         <>
           <Listbox.Label className="block text-sm font-semibold leading-6 text-slate-400">
@@ -42,12 +41,12 @@ export const TokenSelect: FC<{
               <Listbox.Button className="relative w-full cursor-default rounded-md bg-slate-800 py-2 pl-3 pr-10 text-left text-slate-200 shadow-sm ring-1 ring-inset ring-slate-700 focus:outline-none focus:ring-slate-500 sm:text-sm sm:leading-6 text-base">
                 <span className="flex items-center">
                   <img
-                    src={icons[controller.ask_denom]}
+                    src={icons[controller.config.ask_denom]}
                     alt=""
                     className="h-5 w-5 flex-shrink-0 rounded-full"
                   />
                   <span className="ml-3 block truncate">
-                    {Denom.from(controller.ask_denom).symbol}
+                    {Denom.from(controller.config.ask_denom).symbol}
                   </span>
                 </span>
                 <span className="pointer-events-none absolute inset-y-0 right-0 ml-3 flex items-center pr-2">
@@ -83,7 +82,7 @@ export const TokenSelect: FC<{
                         <>
                           <div className="flex items-center">
                             <img
-                              src={icons[x.ask_denom]}
+                              src={icons[x.config.ask_denom]}
                               alt=""
                               className="h-5 w-5 flex-shrink-0 rounded-full"
                             />
@@ -93,7 +92,7 @@ export const TokenSelect: FC<{
                                 "ml-3 block truncate"
                               )}
                             >
-                              {Denom.from(x.ask_denom).symbol}
+                              {Denom.from(x.config.ask_denom).symbol}
                             </span>
                           </div>
 

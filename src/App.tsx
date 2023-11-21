@@ -6,8 +6,6 @@ import { SwapDetails } from "./SwapDetails";
 import { TokenSelect } from "./TokenSelect";
 
 const toClient = async (endpoint: string): Promise<Tendermint37Client> => {
-  const start = new Date().getTime();
-
   const c = await Tendermint37Client.create(
     new HttpBatchClient(endpoint, {
       dispatchInterval: 100,
@@ -18,8 +16,12 @@ const toClient = async (endpoint: string): Promise<Tendermint37Client> => {
   return c;
 };
 
-const QUERY =
-  "https://lcd-kujira.mintthemoon.xyz/cosmwasm/wasm/v1/contract/kujira1n3fr5f56r2ce0s37wdvwrk98yhhq3unnxgcqus8nzsfxvllk0yxquurqty/smart/eyJzdGF0ZSI6e319";
+export type Controller = {
+  address: string;
+  config: ControllerConfig;
+  rates: ControllerRates;
+  status: ControllerStatus;
+};
 
 export type ControllerConfig = {
   owner: string;
@@ -36,6 +38,20 @@ export type ControllerConfig = {
       unbond_end_msg: string;
     };
   };
+};
+
+export type ControllerStatus = {
+  total_base: string;
+  total_quote: string;
+  reserve_available: string;
+  reserve_deployed: string;
+};
+
+export type ControllerRates = {
+  vault_debt: string;
+  vault_interest: string;
+  vault_max_interest: string;
+  provider_redemption: string;
 };
 
 type State = {
@@ -77,9 +93,7 @@ export default function App() {
 }
 
 const Content = () => {
-  const [state, setState] = useState<State>();
-  const [controllers, setControllers] =
-    useState<Record<string, ControllerConfig>>();
+  const [controllers, setControllers] = useState<Record<string, Controller>>();
   const [selected, setSelected] = useState<string>();
   const [queryClient, setQueryClient] = useState<KujiraQueryClient>();
   useEffect(() => {
@@ -90,21 +104,25 @@ const Content = () => {
   }, []);
 
   useEffect(() => {
-    queryClient?.wasm.listContractsByCodeId(2686).then((x) => {
+    queryClient?.wasm.listContractsByCodeId(2688).then((x) => {
       !selected && setSelected(x.contracts[0]);
       x.contracts.map((y) =>
-        queryClient.wasm
-          .queryContractSmart(y, { config: {} })
-          .then((res) => setControllers((prev) => ({ ...prev, [y]: res })))
+        Promise.all([
+          queryClient.wasm.queryContractSmart(y, { config: {} }),
+          queryClient.wasm.queryContractSmart(y, { status: {} }),
+          queryClient.wasm.queryContractSmart(y, { rates: {} }),
+        ]).then(([config, status, rates]) =>
+          setControllers((prev) => ({
+            ...prev,
+            [y]: { address: y, config, status, rates },
+          }))
+        )
       );
     });
   }, [queryClient]);
 
-  useEffect(() => {
-    fetch(QUERY)
-      .then((res) => res.json())
-      .then(setState);
-  }, []);
+  const controller =
+    selected && controllers ? controllers[selected] : undefined;
 
   const [amount, setAmount] = useState("");
   return (
@@ -115,14 +133,11 @@ const Content = () => {
 
       <TokenSelect
         controllers={controllers}
-        selected={selected}
+        controller={controller}
         setSelected={setSelected}
       />
       <AmountInput amount={amount} setAmount={setAmount} />
-      <SwapDetails
-        protocolRate={parseFloat(state?.data.exchange_rate || "0")}
-        amount={amount}
-      />
+      <SwapDetails rates={controller?.rates} amount={amount} />
 
       <div className="text-center mt-4">
         <button

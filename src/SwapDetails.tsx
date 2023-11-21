@@ -1,10 +1,12 @@
 import { FC } from "react";
+import { ControllerRates } from "./App";
 
-export const SwapDetails: FC<{ protocolRate: number; amount: string }> = ({
-  protocolRate,
+export const SwapDetails: FC<{ rates?: ControllerRates; amount: string }> = ({
+  rates,
   amount,
 }) => {
   const premiumRate = 0.997;
+  const protocolRate = rates ? parseFloat(rates.provider_redemption) : 0;
   const returnAmount = parseFloat(amount) * protocolRate * premiumRate;
 
   return (
