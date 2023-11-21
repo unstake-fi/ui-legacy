@@ -1,14 +1,14 @@
 import { FC } from "react";
-import { ControllerRates } from "./App";
+import { ControllerRates, Offer } from "./App";
 
-export const SwapDetails: FC<{ rates?: ControllerRates; amount: string }> = ({
-  rates,
-  amount,
-}) => {
-  const premiumRate = 0.997;
+export const SwapDetails: FC<{
+  rates?: ControllerRates;
+  amount: string;
+  offer?: Offer;
+}> = ({ rates, amount, offer }) => {
   const protocolRate = rates ? parseFloat(rates.provider_redemption) : 0;
-  const returnAmount = parseFloat(amount) * protocolRate * premiumRate;
-
+  const returnAmount = offer ? parseInt(offer.amount) / 1e6 : 0;
+  const offerRate = returnAmount / parseFloat(amount);
   return (
     <div className="flex flex-wrap max-w-2xl mt-3">
       <div className="px-4 py-3 sm:px-6 lg:px-8">
@@ -19,7 +19,6 @@ export const SwapDetails: FC<{ rates?: ControllerRates; amount: string }> = ({
           <span className="text-4xl font-semibold tracking-tight text-white">
             {protocolRate.toFixed(4)}
           </span>
-          <span className="text-sm text-slate-400">KUJI</span>
         </p>
       </div>
 
@@ -29,9 +28,8 @@ export const SwapDetails: FC<{ rates?: ControllerRates; amount: string }> = ({
         </p>
         <p className="mt-0 flex items-baseline gap-x-2">
           <span className="text-4xl font-semibold tracking-tight text-white">
-            {(protocolRate * premiumRate).toFixed(4)}
+            {isFinite(offerRate) && offerRate > 0 ? offerRate.toFixed(4) : "-"}
           </span>
-          <span className="text-sm text-slate-400">KUJI</span>
         </p>
       </div>
 

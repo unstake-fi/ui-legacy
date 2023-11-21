@@ -1,9 +1,18 @@
 import { HttpBatchClient, Tendermint37Client } from "@cosmjs/tendermint-rpc";
-import { KujiraQueryClient, RPCS, TESTNET, kujiraQueryClient } from "kujira.js";
+import {
+  Denom,
+  KUJI,
+  KujiraQueryClient,
+  RPCS,
+  TESTNET,
+  kujiraQueryClient,
+} from "kujira.js";
 import { useEffect, useState } from "react";
 import { AmountInput } from "./AmountInput";
 import { SwapDetails } from "./SwapDetails";
 import { TokenSelect } from "./TokenSelect";
+import { useDebouncedEffect } from "./useDebouncedEffect";
+import { useTokenAmount } from "./useTokenAmount";
 
 const toClient = async (endpoint: string): Promise<Tendermint37Client> => {
   const c = await Tendermint37Client.create(
@@ -54,25 +63,9 @@ export type ControllerRates = {
   provider_redemption: string;
 };
 
-type State = {
-  data: {
-    total_ustake: string;
-    total_utoken: string;
-    exchange_rate: string;
-    unlocked_coins: [
-      {
-        denom: string;
-        amount: string;
-      },
-      {
-        denom: string;
-        amount: string;
-      }
-    ];
-    unbonding: string;
-    available: string;
-    tvl_utoken: string;
-  };
+export type Offer = {
+  amount: string;
+  fee: string;
 };
 
 export default function App() {
@@ -96,6 +89,14 @@ const Content = () => {
   const [controllers, setControllers] = useState<Record<string, Controller>>();
   const [selected, setSelected] = useState<string>();
   const [queryClient, setQueryClient] = useState<KujiraQueryClient>();
+  const [offer, setOffer] = useState<Offer>();
+  const controller =
+    selected && controllers ? controllers[selected] : undefined;
+
+  const [[amount, setAmount], [amountInt, setAmountInt]] = useTokenAmount(
+    controller ? Denom.from(controller?.config.ask_denom) : KUJI
+  );
+
   useEffect(() => {
     Promise.any(RPCS[TESTNET].map(toClient))
       .then((client) => kujiraQueryClient({ client }))
@@ -121,10 +122,20 @@ const Content = () => {
     });
   }, [queryClient]);
 
-  const controller =
-    selected && controllers ? controllers[selected] : undefined;
+  useDebouncedEffect(
+    () => {
+      selected &&
+        amountInt.gt(0) &&
+        queryClient?.wasm
+          .queryContractSmart(selected, {
+            offer: { amount: amountInt.toString() },
+          })
+          .then(setOffer);
+    },
+    [queryClient, amountInt, selected],
+    500
+  );
 
-  const [amount, setAmount] = useState("");
   return (
     <div className="">
       <h1 className="text-slate-100 mt-8 mb-2 text-center text-4xl font-light">
@@ -136,8 +147,14 @@ const Content = () => {
         controller={controller}
         setSelected={setSelected}
       />
-      <AmountInput amount={amount} setAmount={setAmount} />
-      <SwapDetails rates={controller?.rates} amount={amount} />
+      <AmountInput
+        amount={amount}
+        setAmount={(amount) => {
+          setAmount(amount);
+          setOffer(undefined);
+        }}
+      />
+      <SwapDetails amount={amount} rates={controller?.rates} offer={offer} />
 
       <div className="text-center mt-4">
         <button
