@@ -19,7 +19,7 @@ import { useDebouncedEffect } from "./useDebouncedEffect";
 import { useTokenAmount } from "./useTokenAmount";
 
 const CHAIN_ID = TESTNET;
-const CODE_ID = 2691;
+const CODE_ID = 2699;
 
 const toClient = async (endpoint: string): Promise<Tendermint37Client> => {
   const c = await Tendermint37Client.create(
