@@ -123,6 +123,14 @@ const Content = () => {
   }, [queryClient, wallet, controller]);
 
   const connect = async () => {
+    if (!window.leap) {
+      window.open(
+        "https://www.leapwallet.io/download",
+        "_blank",
+        "noopener,noreferrer"
+      );
+      return;
+    }
     if (!queryClient) return;
     const rpcUrl = queryClient["tmClient"].client.url;
     await window.leap.experimentalSuggestChain({
@@ -217,7 +225,7 @@ const Content = () => {
           role="alert"
         >
           <span className="border border-teal-500 flex rounded-full bg-teal-800 px-2 py-1 text-xs font-bold mr-3 text-teal-300">
-            Connected
+            Connected Testnet
           </span>
           <span className="text-xs text-left text-slate-200">
             {wallet.account}
@@ -294,7 +302,7 @@ const Result: FC<{
         role="alert"
       >
         <strong className="font-bold mr-1 text-teal-500">Success:</strong>
-        <span className="block sm:inline mr-1"> {result.transactionHash}</span>
+        <span className="block sm:inline mr-1">{result.transactionHash}</span>
         <svg
           className="fill-current opacity-75 h-4 w-4 ml-auto"
           xmlns="http://www.w3.org/2000/svg"
