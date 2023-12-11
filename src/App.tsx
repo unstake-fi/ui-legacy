@@ -137,7 +137,7 @@ const Content = () => {
     await window.leap.experimentalSuggestChain({
       ...CHAIN_INFO[CHAIN_ID],
       rpc: rpcUrl,
-      rest: "https://kujira-testnet-api.polkachu.com",
+      rest: "https://rest.cosmos.directory.kujira",
     });
     // await window.leap.enable(CHAIN_ID);
     const offlineSigner = await window.leap.getOfflineSignerAuto(CHAIN_ID);
@@ -308,7 +308,7 @@ const Result: FC<{
   if ("transactionHash" in result)
     return (
       <a
-        href={`https://finder.kujira.network/harpoon-4/tx/${result.transactionHash}`}
+        href={`https://finder.kujira.network/${CHAIN_ID}/tx/${result.transactionHash}`}
         target="_blank"
         className="bg-teal-900 border border-teal-500 text-sm px-4 py-3 rounded relative flex items-center text-teal-300 hover:text-white"
         role="alert"
