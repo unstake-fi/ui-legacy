@@ -7,8 +7,8 @@ import { HttpBatchClient, Tendermint37Client } from "@cosmjs/tendermint-rpc";
 import {
   CHAIN_INFO,
   KujiraQueryClient,
+  MAINNET,
   RPCS,
-  TESTNET,
   kujiraQueryClient,
 } from "kujira.js";
 import { FC, useEffect, useMemo, useState } from "react";
@@ -18,8 +18,8 @@ import { TokenSelect } from "./TokenSelect";
 import { useDebouncedEffect } from "./useDebouncedEffect";
 import { useTokenAmount } from "./useTokenAmount";
 
-const CHAIN_ID = TESTNET;
-const CODE_ID = 2699;
+const CHAIN_ID = MAINNET;
+const CODE_ID = 201;
 
 const toClient = async (endpoint: string): Promise<Tendermint37Client> => {
   const c = await Tendermint37Client.create(
@@ -225,7 +225,7 @@ const Content = () => {
           role="alert"
         >
           <span className="border border-teal-500 flex rounded-full bg-teal-800 px-2 py-1 text-xs font-bold mr-3 text-teal-300">
-            Connected Testnet
+            Connected
           </span>
           <span className="text-xs text-left text-slate-200">
             {wallet.account}
@@ -266,13 +266,24 @@ const Content = () => {
             </button>
           )
         ) : (
-          <button
-            onClick={connect}
-            type="button"
-            className="py-2.5 px-5 mr-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-slate-200 hover:bg-slate-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-slate-200 dark:focus:ring-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-600 dark:hover:text-white dark:hover:bg-slate-700"
-          >
-            Connect LEAP Wallet
-          </button>
+          <div>
+            <span className="text-gray-500">Connect</span>
+            <button
+              onClick={connect}
+              type="button"
+              className="py-2.5 px-5 mr-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-slate-200 hover:bg-slate-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-slate-200 dark:focus:ring-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-600 dark:hover:text-white dark:hover:bg-slate-700"
+            >
+              LEAP
+            </button>
+
+            <button
+              onClick={connect}
+              type="button"
+              className="py-2.5 px-5 mr-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-slate-200 hover:bg-slate-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-slate-200 dark:focus:ring-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-600 dark:hover:text-white dark:hover:bg-slate-700"
+            >
+              Sonar
+            </button>
+          </div>
         )}
       </div>
     </div>
