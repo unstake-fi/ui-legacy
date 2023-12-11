@@ -16,6 +16,7 @@ import { AmountInput } from "./AmountInput";
 import { SwapDetails } from "./SwapDetails";
 import { TokenSelect } from "./TokenSelect";
 import { useDebouncedEffect } from "./useDebouncedEffect";
+import { useQueryParam } from "./useQueryParam";
 import { useTokenAmount } from "./useTokenAmount";
 
 const CHAIN_ID = MAINNET;
@@ -94,7 +95,7 @@ export default function App() {
 
 const Content = () => {
   const [controllers, setControllers] = useState<Record<string, Controller>>();
-  const [selected, setSelected] = useState<string>();
+  const [selected, setSelected] = useQueryParam<string>("controller", "");
   const [queryClient, setQueryClient] = useState<KujiraQueryClient>();
   const [offer, setOffer] = useState<Offer>();
   const controller = useMemo(
