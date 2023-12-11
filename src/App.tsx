@@ -13,12 +13,12 @@ import {
 } from "kujira.js";
 import { FC, useEffect, useMemo, useState } from "react";
 import { AmountInput } from "./AmountInput";
+import { Stats } from "./Stats";
 import { SwapDetails } from "./SwapDetails";
 import { TokenSelect } from "./TokenSelect";
 import { useDebouncedEffect } from "./useDebouncedEffect";
 import { useQueryParam } from "./useQueryParam";
 import { useTokenAmount } from "./useTokenAmount";
-import { ArrowTopRightOnSquareIcon } from "@heroicons/react/20/solid";
 
 const CHAIN_ID = MAINNET;
 const CODE_ID = 201;
@@ -281,71 +281,18 @@ const Content = () => {
                 LEAP
               </button>
 
-              <button
+              {/* <button
                 onClick={connect}
                 type="button"
                 className="py-2.5 px-5 mr-2 mb-2 text-sm font-medium focus:outline-none rounded-lg border focus:z-10 focus:ring-4 focus:ring-slate-700 bg-slate-800 text-slate-400 border-slate-600 dark:hover:text-white hover:bg-slate-700"
               >
                 Sonar
-              </button>
+              </button> */}
             </div>
           </>
         )}
       </div>
-
-      <div className="rounded-xl p-8 border border-slate-800 mt-3">
-        <table className="table-auto text-slate-600 text-sm  w-full">
-          <tbody>
-            <tr>
-              <th className="text-left font-semibold">Reserves Available:</th>
-              <td className="text-right">
-                <a
-                  href=""
-                  target="_blank"
-                  className="inline-flex items-center text-slate-300 hover:text-purple-500"
-                >
-                  0.000
-                  <ArrowTopRightOnSquareIcon className="h-4 w-4 text-slate-600 ml-1" />
-                </a>
-              </td>
-            </tr>
-            <tr>
-              <th className="text-left font-semibold">Reserves In Use:</th>
-              <td className="text-right text-slate-300">
-                <a
-                  href=""
-                  target="_blank"
-                  className="inline-flex items-center text-slate-300 hover:text-purple-500"
-                >
-                  0.000
-                  <ArrowTopRightOnSquareIcon className="h-4 w-4 text-slate-600 ml-1" />
-                </a>
-              </td>
-            </tr>
-            <tr>
-              <th className="text-left font-semibold">
-                GHOST Borrow Available:
-              </th>
-              <td className="text-right text-slate-300">
-                <a
-                  href=""
-                  target="_blank"
-                  className="inline-flex items-center text-slate-300 hover:text-purple-500"
-                >
-                  0.000
-                  <ArrowTopRightOnSquareIcon className="h-4 w-4 text-slate-600 ml-1" />
-                </a>
-              </td>
-            </tr>
-            <tr>
-              <th className="text-left font-semibold">Total Unstaked:</th>
-              <td className="text-right text-slate-300">
-                0.000<div className="inline-block w-4 h-4 ml-1"></div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <Stats queryClient={queryClient} controller={selected} />
     </div>
   );
 };
