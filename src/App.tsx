@@ -79,7 +79,7 @@ export type Offer = {
 
 export default function App() {
   const [chainId, setChainId] = useState<typeof MAINNET | typeof TESTNET>(
-    TESTNET
+    MAINNET
   );
 
   return (
@@ -93,6 +93,16 @@ export default function App() {
           />
         </div>
         <Content chainId={chainId} key={chainId} />
+        <select
+          className="relative cursor-default rounded-md bg-slate-800 py-1 pl-3 mt-10 pr-10 text-left text-slate-200 shadow-sm ring-1 ring-inset ring-slate-700 focus:outline-none focus:ring-slate-500 text-xs sm:leading-6"
+          value={chainId}
+          onInput={(e) =>
+            setChainId(e.currentTarget.value as typeof MAINNET | typeof TESTNET)
+          }
+        >
+          <option value={MAINNET}>Mainnet</option>
+          <option value={TESTNET}>Testnet</option>
+        </select>
       </div>
     </div>
   );
@@ -221,10 +231,10 @@ const Content: FC<{ chainId: typeof MAINNET | typeof TESTNET }> = ({
           res.flat().reduce((a, v) => ({ ...a, [v.address]: v }), {})
         )
         .then((res) => {
-          !selected && setSelected(Object.keys(res)[0]);
+          setSelected(Object.keys(res)[0]);
           setControllers((prev) => ({ ...prev, ...res }));
         });
-  }, [queryClient, selected, chainId]);
+  }, [queryClient, chainId]);
 
   useDebouncedEffect(
     () => {
