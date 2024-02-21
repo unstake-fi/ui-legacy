@@ -56,7 +56,8 @@ export const Stats: FC<{
                 target="_blank"
                 className="inline-flex items-center text-slate-300 hover:text-purple-500"
               >
-                {reserveAvailable.toFixed(4)} KUJI
+                {reserveAvailable.toFixed(4)}{" "}
+                {Denom.from(controller?.config.offer_denom || "").symbol}
                 <ArrowTopRightOnSquareIcon className="h-4 w-4 text-slate-600 ml-1" />
               </a>
             </td>
@@ -69,7 +70,8 @@ export const Stats: FC<{
                 target="_blank"
                 className="inline-flex items-center text-slate-300 hover:text-purple-500"
               >
-                {reserveDeployed.toFixed(4)} KUJI
+                {reserveDeployed.toFixed(4)}{" "}
+                {Denom.from(controller?.config.offer_denom || "").symbol}
                 <ArrowTopRightOnSquareIcon className="h-4 w-4 text-slate-600 ml-1" />
               </a>
             </td>
@@ -82,7 +84,7 @@ export const Stats: FC<{
                 target="_blank"
                 className="inline-flex items-center text-slate-300 hover:text-purple-500"
               >
-                {reserveDeployed.toFixed(4)} KUJI
+                {reserveDeployed.toFixed(4)} {Denom.from(controller?.config.offer_denom|| "").symbol}
                 <ArrowTopRightOnSquareIcon className="h-4 w-4 text-slate-600 ml-1" />
               </a>
             </td>

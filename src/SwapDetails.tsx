@@ -1,11 +1,13 @@
+import { Denom } from "kujira.js";
 import { FC } from "react";
-import { ControllerRates, Offer } from "./App";
+import { Controller, Offer } from "./App";
 
 export const SwapDetails: FC<{
-  rates?: ControllerRates;
+  controller?: Controller;
   amount: string;
   offer?: Offer;
-}> = ({ rates, amount, offer }) => {
+}> = ({ controller, amount, offer }) => {
+  const rates = controller?.rates;
   const protocolRate = rates ? parseFloat(rates.provider_redemption) : 0;
   const returnAmount = offer ? parseInt(offer.amount) / 1e6 : 0;
   const offerRate = returnAmount / parseFloat(amount);
@@ -41,7 +43,9 @@ export const SwapDetails: FC<{
           <span className="text-4xl font-semibold tracking-tight text-white">
             {isFinite(returnAmount) ? returnAmount.toFixed(4) : "-"}
           </span>
-          <span className="text-sm text-slate-400">KUJI</span>
+          <span className="text-sm text-slate-400">
+            {Denom.from(controller?.config.offer_denom || "").symbol}
+          </span>
         </p>
       </div>
       <div className="w-full h-1" />

@@ -290,7 +290,7 @@ const Content: FC<{ chainId: typeof MAINNET | typeof TESTNET }> = ({
           setOffer(undefined);
         }}
       />
-      <SwapDetails amount={amount} rates={controller?.rates} offer={offer} />
+      <SwapDetails amount={amount} controller={controller} offer={offer} />
 
       <div className="text-center mt-4">
         {wallet ? (
