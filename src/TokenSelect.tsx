@@ -13,6 +13,15 @@ const icons: Record<string, string> = {
 
   "factory/kujira1eqqr3ad0lh84ua4m5qu2n4jjz6h73d64jfwvng0w2k0lnhltt4jqdex4z9/urcpt":
     "https://raw.githubusercontent.com/cosmos/chain-registry/master/kujira/images/qckuji.svg",
+
+  "factory/kujira1m96ucsfpt2yy72w09z2rxjdj38y5qd8lqx5jtggnejmdua2ynpnsxyvjex/urcpt":
+    "https://raw.githubusercontent.com/cosmos/chain-registry/master/kujira/images/qckuji.svg",
+
+  "factory/kujira1qzu3up50auxhqyzfq56znuj8n38q2ra7daaf9ef7vg8gu66jh4fqd2wd2y/urcpt":
+    "https://raw.githubusercontent.com/cosmos/chain-registry/master/kujira/images/qcmnta.svg",
+
+  "factory/kujira1l04ged98c7a7s9tllu62ld09ztylwf442qgm4thfgmadrvngeumsz4zrh2/urcpt":
+    "https://raw.githubusercontent.com/cosmos/chain-registry/master/kujira/images/qcfuzn.svg",
 };
 
 function classNames(...classes: string[]) {
