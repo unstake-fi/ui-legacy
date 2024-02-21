@@ -9,6 +9,7 @@ import {
   KujiraQueryClient,
   MAINNET,
   RPCS,
+  TESTNET,
   kujiraQueryClient,
 } from "kujira.js";
 import { FC, useEffect, useMemo, useState } from "react";
@@ -20,8 +21,7 @@ import { useDebouncedEffect } from "./useDebouncedEffect";
 import { useQueryParam } from "./useQueryParam";
 import { useTokenAmount } from "./useTokenAmount";
 
-const CHAIN_ID = MAINNET;
-const CODE_ID = 201;
+const CODES = { [MAINNET]: [201, 246], [TESTNET]: [2699, 2990] };
 
 const toClient = async (endpoint: string): Promise<Tendermint37Client> => {
   const c = await Tendermint37Client.create(
@@ -78,6 +78,10 @@ export type Offer = {
 };
 
 export default function App() {
+  const [chainId, setChainId] = useState<typeof MAINNET | typeof TESTNET>(
+    TESTNET
+  );
+
   return (
     <div className="min-h-screen bg-slate-900 flex items-center p-4 sm:p-6 lg:p-8">
       <div className="mx-auto max-w-7xl">
@@ -88,13 +92,42 @@ export default function App() {
             className="block h-20"
           />
         </div>
-        <Content />
+        <Content chainId={chainId} key={chainId} />
       </div>
     </div>
   );
 }
 
-const Content = () => {
+const queryContract =
+  (queryClient: KujiraQueryClient) =>
+  (address: string): Promise<Controller> =>
+    Promise.all([
+      queryClient.wasm.queryContractSmart(address, { config: {} }),
+      queryClient.wasm.queryContractSmart(address, { status: {} }),
+      queryClient.wasm.queryContractSmart(address, { rates: {} }),
+    ]).then(
+      ([config, status, rates]: [
+        ControllerConfig,
+        ControllerStatus,
+        ControllerRates
+      ]) => ({
+        address,
+        config,
+        status,
+        rates,
+      })
+    );
+
+const queryCode =
+  (queryClient: KujiraQueryClient) =>
+  (id: number): Promise<Controller[]> =>
+    queryClient.wasm
+      .listContractsByCodeId(id)
+      .then((x) => Promise.all(x.contracts.map(queryContract(queryClient))));
+
+const Content: FC<{ chainId: typeof MAINNET | typeof TESTNET }> = ({
+  chainId,
+}) => {
   const [controllers, setControllers] = useState<Record<string, Controller>>();
   const [selected, setSelected] = useQueryParam<string>("controller", "");
   const [queryClient, setQueryClient] = useState<KujiraQueryClient>();
@@ -136,12 +169,12 @@ const Content = () => {
     if (!queryClient) return;
     const rpcUrl = queryClient["tmClient"].client.url;
     await window.leap.experimentalSuggestChain({
-      ...CHAIN_INFO[CHAIN_ID],
+      ...CHAIN_INFO[chainId],
       rpc: rpcUrl,
       rest: "https://rest.cosmos.directory.kujira",
     });
     // await window.leap.enable(CHAIN_ID);
-    const offlineSigner = await window.leap.getOfflineSignerAuto(CHAIN_ID);
+    const offlineSigner = await window.leap.getOfflineSignerAuto(chainId);
     const accounts = await offlineSigner.getAccounts();
 
     const client = await SigningCosmWasmClient.connectWithSigner(
@@ -172,31 +205,26 @@ const Content = () => {
   };
 
   useEffect(() => {
-    Promise.any(RPCS[CHAIN_ID].map(toClient))
+    setQueryClient(undefined);
+    Promise.any(RPCS[chainId].map(toClient))
       .then((client) => kujiraQueryClient({ client }))
       .then(setQueryClient)
       .catch((err) => {
         console.error(err);
       });
-  }, []);
+  }, [chainId]);
 
   useEffect(() => {
-    queryClient?.wasm.listContractsByCodeId(CODE_ID).then((x) => {
-      !selected && setSelected(x.contracts[0]);
-      x.contracts.map((y) =>
-        Promise.all([
-          queryClient.wasm.queryContractSmart(y, { config: {} }),
-          queryClient.wasm.queryContractSmart(y, { status: {} }),
-          queryClient.wasm.queryContractSmart(y, { rates: {} }),
-        ]).then(([config, status, rates]) =>
-          setControllers((prev) => ({
-            ...prev,
-            [y]: { address: y, config, status, rates },
-          }))
+    queryClient &&
+      Promise.all(CODES[chainId].map(queryCode(queryClient)))
+        .then((res) =>
+          res.flat().reduce((a, v) => ({ ...a, [v.address]: v }), {})
         )
-      );
-    });
-  }, [queryClient, selected]);
+        .then((res) => {
+          !selected && setSelected(Object.keys(res)[0]);
+          setControllers((prev) => ({ ...prev, ...res }));
+        });
+  }, [queryClient, selected, chainId]);
 
   useDebouncedEffect(
     () => {
@@ -257,7 +285,11 @@ const Content = () => {
       <div className="text-center mt-4">
         {wallet ? (
           result ? (
-            <Result result={result} onClick={() => setResult(null)} />
+            <Result
+              result={result}
+              onClick={() => setResult(null)}
+              chainId={chainId}
+            />
           ) : (
             <button
               onClick={submit}
@@ -292,7 +324,7 @@ const Content = () => {
           </>
         )}
       </div>
-      <Stats queryClient={queryClient} controller={selected} />
+      <Stats queryClient={queryClient} controller={controller} />
     </div>
   );
 };
@@ -300,7 +332,8 @@ const Content = () => {
 const Result: FC<{
   result: "working" | Error | ExecuteResult;
   onClick: () => void;
-}> = ({ result, onClick }) => {
+  chainId: string;
+}> = ({ result, onClick, chainId }) => {
   if (result === "working")
     return (
       <div
@@ -314,7 +347,7 @@ const Result: FC<{
   if ("transactionHash" in result)
     return (
       <a
-        href={`https://finder.kujira.network/${CHAIN_ID}/tx/${result.transactionHash}`}
+        href={`https://finder.kujira.network/${chainId}/tx/${result.transactionHash}`}
         target="_blank"
         className="bg-teal-900 border border-teal-500 text-sm px-4 py-3 rounded relative flex items-center text-teal-300 hover:text-white"
         role="alert"

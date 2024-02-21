@@ -1,7 +1,8 @@
 import { BigNumber } from "@ethersproject/bignumber";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/20/solid";
-import { KujiraQueryClient } from "kujira.js";
+import { Denom, KujiraQueryClient } from "kujira.js";
 import { FC, useEffect, useState } from "react";
+import { Controller } from "./App";
 
 interface StatusResponse {
   total_base: string;
@@ -19,14 +20,14 @@ interface Status {
 
 export const Stats: FC<{
   queryClient?: KujiraQueryClient;
-  controller?: string;
+  controller?: Controller;
 }> = ({ queryClient, controller }) => {
   const [status, setStatus] = useState<Status>();
 
   useEffect(() => {
     controller &&
       queryClient?.wasm
-        .queryContractSmart(controller, { status: {} })
+        .queryContractSmart(controller.address, { status: {} })
         .then((res: StatusResponse) =>
           setStatus({
             totalBase: BigNumber.from(res.total_base),
@@ -89,7 +90,8 @@ export const Stats: FC<{
           <tr>
             <th className="text-left font-semibold">Total Unstaked:</th>
             <td className="text-right text-slate-300">
-              {totalBase.toFixed(4)} ampKUJI
+              {totalBase.toFixed(4)}{" "}
+              {Denom.from(controller?.config.ask_denom || "").symbol}
               <div className="inline-block w-4 h-4 ml-1"></div>
             </td>
           </tr>
