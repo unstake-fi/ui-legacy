@@ -11,6 +11,9 @@ const icons: Record<string, string> = {
   "factory/kujira1n3fr5f56r2ce0s37wdvwrk98yhhq3unnxgcqus8nzsfxvllk0yxquurqty/ampKUJI":
     "https://raw.githubusercontent.com/cosmos/chain-registry/master/kujira/images/ampkuji.png",
 
+  "factory/kujira175yatpvkpgw07w0chhzuks3zrrae9z9g2y6r7u5pzqesyau4x9eqqyv0rr/ampMNTA":
+    "https://raw.githubusercontent.com/cosmos/chain-registry/master/kujira/images/ampmnta.png",
+
   "factory/kujira1eqqr3ad0lh84ua4m5qu2n4jjz6h73d64jfwvng0w2k0lnhltt4jqdex4z9/urcpt":
     "https://raw.githubusercontent.com/cosmos/chain-registry/master/kujira/images/qckuji.svg",
 
