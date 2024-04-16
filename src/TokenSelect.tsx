@@ -25,6 +25,9 @@ const icons: Record<string, string> = {
 
   "factory/kujira1l04ged98c7a7s9tllu62ld09ztylwf442qgm4thfgmadrvngeumsz4zrh2/urcpt":
     "https://raw.githubusercontent.com/cosmos/chain-registry/master/kujira/images/qcfuzn.svg",
+
+  "factory/kujira15e8q5wzlk5k38gjxlhse3vu6vqnafysncx2ltexd6y9gx50vuj2qpt7dgv/boneKuji":
+    "https://raw.githubusercontent.com/unstake-fi/ui/master/public/bKUJI.png",
 };
 
 function classNames(...classes: string[]) {

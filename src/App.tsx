@@ -21,7 +21,7 @@ import { useDebouncedEffect } from "./useDebouncedEffect";
 import { useQueryParam } from "./useQueryParam";
 import { useTokenAmount } from "./useTokenAmount";
 
-const CODES = { [MAINNET]: [201, 246], [TESTNET]: [2699, 2990] };
+const CODES = { [MAINNET]: [201, 246, 252], [TESTNET]: [2699, 2990] };
 
 const toClient = async (endpoint: string): Promise<Tendermint37Client> => {
   const c = await Tendermint37Client.create(
